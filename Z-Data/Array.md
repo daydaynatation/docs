@@ -140,12 +140,12 @@ Are represented as:
 
 During runtime the value `foo` is a reference, and all the operations, e.g. pattern match, go through dereferencing. Values like this are called *boxed* because it's a reference to a box, i.e. heap objects with [info-table](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/storage/heap-objects#info-tables). The info-table contains many useful infomation about the box, such as how many words the boxed occupied, which constructor the box stand for, etc.
 
-The `3#` and `'a'#` above are Haskell's non-pointer value, we call values like this *unboxed* values. Unboxed values don't have info-tables, so we really can't have them directly on heap: otherwise the GC would get confused when it scans them: without infomation from info-table, it can't decide how many bytes to copy. These values are usually belong to registers or other boxes: we generate machine code to manipulate them directly.
+The `3#` and `'a'#` above are Haskell's non-pointer value, we call values like this *unboxed* values. Unboxed values don't have info-tables, so we really can't have them directly on heap: otherwise the GC would get confused when it scans them: without infomation from info-table, it can't decide how many bytes to copy. These values usually belong to registers or other boxes: we generate machine code to manipulate them directly.
 
 
 ## Boxed array
 
-Now let's consider GHC arrays, they're special heap objects provided by RTS. We have boxed arrays `MutableArray#` and `Array#` that store references to boxes:
+Now let's consider GHC arrays, they're special heap objects provided by the RTS. We have boxed arrays `MutableArray#` and `Array#` that store references to boxes:
 
 ```
 +-------------+--------------+---------------------------+---+-...-+---+---+------------+
@@ -181,7 +181,7 @@ data SmallMutableArray s a = SmallMutableArray (SmallMutableArray# s a)
 data SmallArray a = SmallArray (SmallArray# a)
 ```
 
-A common pattern in Haskell is to turn `MutableArray` into an `Array` with freeze operations after creation complete, but the card-table's space is still there in case we thaw the array in place again. Generally speaking, under creation-freeze pattern, `MutableSmallArray` and `SmallArray` are more recommended since you won't keep mutable array on heap for too long.
+A common pattern in Haskell is to turn `MutableArray` into an `Array` with freeze operations after creation complete, but the card-table's space is still there in case we thaw the array in place again. Generally speaking, with the creation-freeze pattern, `MutableSmallArray` and `SmallArray` are more recommended since you won't keep the mutable array on the heap for too long.
 
 ## Unboxed array
 
@@ -195,7 +195,7 @@ A common pattern in Haskell is to turn `MutableArray` into an `Array` with freez
  ByteArray#   
 ```
 
-`ByteArray#`s can be used to encode different size non-pointer data, such as `Int` and `Word8`, `ghc-prim` provide seperated functions to work with different data types: `indexIntArray#`, `indexWord8Array#`, etc, So there're `Prim` class and `PrimArray` type to make working with different types easier:
+`ByteArray#`s can be used to encode non-pointer data types of different sizes, such as `Int` and `Word8`, `ghc-prim`, providing seperate functions to work with different data types: `indexIntArray#`, `indexWord8Array#`, etc. So there're `Prim` class and `PrimArray` type which makes working with different types easier:
 
 ```haskell
 -- types which can be stored in ByteArray# 
